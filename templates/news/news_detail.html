@@ -1,0 +1,68 @@
+{% extends 'default.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ post.title|censor }}</h1>
+    <h5 class="text-muted">Автор: {{ post.author.AuthorUser.first_name }} {{ post.author.AuthorUser.last_name }}</h5>
+    <p class="text-muted">Опубликовано: {{ post.dateCreation|date:"d-M-Y H:i" }}</p>
+    <!--
+        Если требуется изображение
+        <div class="mb-4">
+            <img src="https://static.thenounproject.com/png/4595376-200.png" class="d-block mx-auto" alt="{{ post.title }}">
+        </div>
+     -->
+     <p class="text-muted">
+        Тип: 
+        {% if post.CategoryType == 'NW' %}
+            <span class="badge bg-primary">Новость</span>
+        {% elif post.CategoryType == 'AR' %}
+            <span class="badge bg-secondary">Статья</span>
+        {% endif %}
+    </p>
+     <p class="text-muted">
+        Категория(и): 
+        {% for category in post.categories.all %}
+            <span class="badge bg-info">{{ category.name }}</span>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    <p>{{ post.text|censor }}</p>
+
+    <div class="mt-4">
+        <!-- Доп. логика для оценки (если требуется) -->
+        <h5>Рейтинг: {{ post.rating }}</h5>
+        <button class="btn btn-success" onclick="" disabled>Нравится</button>
+        <button class="btn btn-danger" onclick="" disabled>Не нравится</button>
+    </div>
+
+    <div class="mt-4">
+        <h6>Комментарии</h6>
+        {% if comments %}
+            <ul class="list-unstyled">
+                {% for comment in comments %}
+                    <li class="border-bottom py-2">
+                        <strong>{{ comment.commentUser.username }}</strong> 
+                        <span class="text-muted">{{ comment.dateCreation|date:"d-M-Y H:i" }}</span>
+                        <p>{{ comment.text|censor }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Комментариев пока нет.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <h6>Добавить комментарий</h6>
+        <form method="post">
+            {% csrf_token %}
+            <textarea class="form-control" name="comment_text" rows="3" placeholder="Оставьте ваш комментарий..." disabled></textarea>
+
+            <button type="submit" class="btn btn-primary mt-2" disabled>Отправить</button>
+            <div class="mt-4">
+                <a href="javascript:history.back()" class="btn btn-danger">Назад</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
