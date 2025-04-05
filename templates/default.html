@@ -23,6 +23,10 @@
     <main>
         {% block content %}
             <p class="text-secondary text-center h2">Базовый шаблон</p>
+            <div class="d-flex justify-content-center">
+                <a href="{% url 'news_list' %}" class="btn btn-primary mt-4">Перейти к новостям</a>
+            </div>
+            
         {% endblock %}
     </main>
 
