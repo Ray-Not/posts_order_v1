@@ -1,11 +1,11 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models import Sum
 
 
 class Author(models.Model):
-    AuthorUser = models.OneToOneField(User, on_delete=models.CASCADE)
-    ratingAuthor = models.IntegerField(default=0)
+    author = models.OneToOneField(User, on_delete=models.CASCADE)
+    rating_author = models.IntegerField(default=0)
 
     def update_rating(self):
         post_rating = self.post_set.aggregate(
@@ -31,8 +31,12 @@ class Author(models.Model):
         )
         self.save()
 
+    @property
+    def username(self):
+        return self.author.username
+
     def __str__(self):
-        return f'{self.AuthorUser.first_name} {self.AuthorUser.last_name}'
+        return f'{self.author.username}'
 
 
 class Category(models.Model):

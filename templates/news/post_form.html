@@ -1,0 +1,32 @@
+{% extends 'default.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mt-5">
+        {% if object %}
+            Редактирование поста
+        {% else %}
+            Создание поста
+        {% endif %}
+    </h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-block mt-2">
+                        {% if object %}
+                            Обновить пост
+                        {% else %}
+                            Создать пост
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'post_list' %}" class="btn btn-primary btn-block mt-2">Вернуться к постам</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

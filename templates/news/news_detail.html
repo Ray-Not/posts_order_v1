@@ -4,7 +4,13 @@
 {% block content %}
 <div class="container mt-4">
     <h1>{{ post.title|censor }}</h1>
-    <h5 class="text-muted">Автор: {{ post.author.AuthorUser.first_name }} {{ post.author.AuthorUser.last_name }}</h5>
+    <div class="row col-2">
+        {% if post.author.author == request.user %}
+            <a href="{% url 'post_edit' post.id %}" class="btn btn-success mb-2">Редактировать</a>
+            <a href="{% url 'post_delete' post.id %}" class="btn btn-danger mb-2">Удалить</a>
+        {% endif %}
+    </div>
+    <h5 class="text-muted">Автор: {{ post.author.username }}</h5>
     <p class="text-muted">Опубликовано: {{ post.dateCreation|date:"d-M-Y H:i" }}</p>
     <!--
         Если требуется изображение
@@ -59,7 +65,7 @@
             <textarea class="form-control" name="comment_text" rows="3" placeholder="Оставьте ваш комментарий..." disabled></textarea>
 
             <button type="submit" class="btn btn-primary mt-2" disabled>Отправить</button>
-            <div class="mt-4">
+            <div class="mt-2">
                 <a href="javascript:history.back()" class="btn btn-danger">Назад</a>
             </div>
         </form>
