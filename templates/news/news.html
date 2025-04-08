@@ -5,7 +5,17 @@
     <h1>Посты</h1>
     
     <a href="{% url 'home' %}" class="btn btn-outline-primary my-3">Вернуться на главную</a>
-    <a href="{% url 'post_create' %}" class="btn btn-outline-primary my-3">Создать пост {% if not request.user.is_authenticated %} (требуется авторизация) {% endif %}</a>
+    {% if request.user.is_authenticated and request.user|has_group:"authors"%}
+        <a href="{% url 'post_create' %}" class="btn btn-outline-primary my-3">Создать пост</a>
+    {% elif not request.user.is_authenticated %}
+        <a href="/accounts/" class="btn btn-outline-primary my-3">
+            Требуется авторизация, чтобы создать пост
+        </a>
+    {% else %}
+        <a href="/accounts/" class="btn btn-outline-primary my-3">
+            Нужно быть автором, чтобы создать пост
+        </a>
+    {% endif %}
 
     <div class="row">
         {% for post in page_obj %}

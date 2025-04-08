@@ -1,14 +1,13 @@
-from django.contrib import messages
-from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, UpdateView
-
-from .forms import CustomAuthenticationForm, CustomUserCreationForm, PostForm
+from django.contrib.auth.decorators import login_required
+from .forms import PostForm
 from .models import Author, Post
+from django.contrib.auth.models import Group
 
 
 def home_view(request):
@@ -65,51 +64,18 @@ def news_search(request):
     return render(request, 'news/search.html', context)
 
 
-def signup(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Аккаунт {username} успешно создан!')
-            return redirect('login')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'news/auth/register.html', {'form': form})
-
-
-def signin(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = CustomAuthenticationForm()
-    return render(request, 'news/auth/login.html', {'form': form})
-
-
-def signout(request):
-    if not request.user.is_authenticated:
-        return redirect('home')
-    logout(request)
-    return render(request, 'news/auth/logout.html')
-
-
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'news/post_form.html'
-    success_url = reverse_lazy('news_list')
+    success_url = reverse_lazy('post_list')
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('login')
+        if (
+            not request.user.is_authenticated or
+            not request.user.groups.filter(name='authors').exists()
+        ):
+            return redirect('/accounts/')
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -133,7 +99,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('post_detail', kwargs={'id': self.object.pk})
 
     def get_permission_denied_message(self):
-        return 'Some'
+        pass
 
 
 class PostDeleteView(LoginRequiredMixin, DeleteView):
@@ -144,5 +110,13 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         post = super().get_object(queryset)
         if post.author.author != self.request.user:
-            raise PermissionDenied("У вас нет прав на удаление этого поста.")
+            raise PermissionDenied()
         return post
+
+
+@login_required
+def become_author(request):
+    authors_group, _ = Group.objects.get_or_create(name='authors')
+    Author.objects.get_or_create(author=request.user, rating_author=0)
+    request.user.groups.add(authors_group)
+    return redirect('/accounts/')

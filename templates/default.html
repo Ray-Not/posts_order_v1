@@ -29,21 +29,9 @@
             <div class="d-flex justify-content-center">
                 <a href="{% url 'post_search' %}" class="btn btn-primary mt-4 col-3">Перейти к поиску</a>
             </div>
-            {% if not request.user.is_authenticated %}
-                <div class="d-flex justify-content-center">
-                    <a href="{% url 'register' %}" class="btn btn-outline-primary mt-4 col-3">Регистрация</a>
-                </div>
-                <div class="d-flex justify-content-center">
-                    <a href="{% url 'login' %}" class="btn btn-outline-primary mt-4 col-3">Вход</a>
-                </div>
-            {% else %}
             <div class="d-flex justify-content-center">
-                <form method="POST" action="{% url 'logout' %}" class="col-3">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger mt-4 w-100">Выход</button>
-                </form>
+                <a href="/accounts/" class="btn btn-outline-primary mt-4 col-3">Аккаунт</a>
             </div>
-            {% endif %}
             
         {% endblock %}
     </main>

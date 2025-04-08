@@ -1,9 +1,8 @@
 # from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 
 from .views import (PostCreateView, PostDeleteView, PostUpdateView, home_view,
-                    news_detail, news_list, news_search, signin, signout,
-                    signup)
+                    news_detail, news_list, news_search, become_author)
 
 namespace = 'newapp'
 
@@ -19,7 +18,6 @@ urlpatterns = [
         name='post_delete'
     ),
     path('search/', news_search, name='post_search'),
-    path('register/', signup, name='register'),
-    path('login/', signin, name='login'),
-    path('logout/', signout, name='logout'),
+    path('accounts/', include('allauth.urls')),
+    path('become-author/', become_author, name='become_author'),
 ]
