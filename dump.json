@@ -1282,22 +1282,6 @@
     }
 },
 {
-    "model": "socialaccount.socialapp",
-    "pk": 1,
-    "fields": {
-        "provider": "google",
-        "provider_id": "",
-        "name": "Google_auth",
-        "client_id": "token anti git",
-        "secret": "token anti git",
-        "key": "",
-        "settings": {},
-        "sites": [
-            1
-        ]
-    }
-},
-{
     "model": "socialaccount.socialaccount",
     "pk": 1,
     "fields": {
