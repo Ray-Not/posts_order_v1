@@ -1,8 +1,9 @@
 # from django.contrib.auth import views as auth_views
-from django.urls import path, include
+from django.urls import include, path
 
-from .views import (PostCreateView, PostDeleteView, PostUpdateView, home_view,
-                    news_detail, news_list, news_search, become_author)
+from .views import (PostCreateView, PostDeleteView, PostUpdateView,
+                    become_author, home_view, news_detail, news_list,
+                    news_search, subscribe_to_category, CustomEmailView)
 
 namespace = 'newapp'
 
@@ -18,6 +19,12 @@ urlpatterns = [
         name='post_delete'
     ),
     path('search/', news_search, name='post_search'),
+    path('accounts/email/', CustomEmailView.as_view(), name='account_email'),
     path('accounts/', include('allauth.urls')),
     path('become-author/', become_author, name='become_author'),
+    path(
+        'subscribe/<int:category_id>/',
+        subscribe_to_category,
+        name='subscribe_to_category'
+    )
 ]

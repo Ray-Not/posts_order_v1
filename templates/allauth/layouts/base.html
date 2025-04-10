@@ -49,29 +49,12 @@
                             </li>
                         </ul>
                         <div class="d-flex flex-column flex-sm-row gap-2 col-lg-3 justify-content-lg-end text-nowrap">
-                            <form class="d-flex" method="post" action="{% url 'set_language' %}">
-                                {% csrf_token %}
-                                {% get_available_languages as LANGUAGES %}
-                                {% get_current_language as LANGUAGE_CODE %}
-                                <label for="language-dropdown" class="visually-hidden">{% translate "Select Language" %}</label>
-                                <select id="language-dropdown"
-                                        aria-label="{% translate 'Select Language' %}"
-                                        name="language"
-                                        onchange="this.form.submit()">
-                                    {% get_language_info_list for LANGUAGES as languages %}
-                                    {% for lang in languages %}
-                                        <option lang="{{ lang.code }}"
-                                                {% if lang.code == LANGUAGE_CODE %}selected{% endif %}
-                                                value="{{ lang.code }}">{{ lang.name_local }}</option>
-                                    {% endfor %}
-                                </select>
-                            </form>
                             {% if user.is_authenticated %}
                                 {% url 'account_email' as email_url_ %}
                                 {% url 'socialaccount_connections' as socialaccount_url_ %}
                                 {% if email_url_ or socialaccount_url_ %}
                                     <a href="{% if email_url_ %}{{ email_url_ }}{% else %}{{ socialaccount_url_ }}{% endif %}"
-                                       class="btn btn-secondary">Manage Account</a>
+                                       class="btn btn-secondary">Управление аккаунтом</a>
                                 {% endif %}
                                 <a href="{% url 'account_logout' %}" class="btn btn-danger">{% translate "Sign Out" %}</a>
                             {% else %}

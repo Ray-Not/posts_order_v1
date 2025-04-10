@@ -26,12 +26,23 @@
             <span class="badge bg-secondary">Статья</span>
         {% endif %}
     </p>
-     <p class="text-muted">
+
+    <p class="text-muted">
         Категория(и): 
-        {% for category in post.categories.all %}
-            <span class="badge bg-info">{{ category.name }}</span>{% if not forloop.last %}, {% endif %}
-        {% endfor %}
+        <div class="d-flex flex-column">
+            {% for category in post.categories.all %}
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-info me-2">{{ category.name }}</span>
+                    {% if request.user in category.subscribers.all %}
+                        <a class="btn btn-danger btn-sm" href="{% url 'subscribe_to_category' category.id %}">Отписаться от категории</a>
+                    {% else %}
+                        <a class="btn btn-warning btn-sm" href="{% url 'subscribe_to_category' category.id %}">Подписаться на категорию</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     </p>
+
     <p>{{ post.text|censor }}</p>
 
     <div class="mt-4">

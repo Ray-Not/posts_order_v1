@@ -71,3 +71,6 @@ poetry.lock
 # Windows
 Thumbs.db
 ehthumbs.db
+
+
+celerybeat-schedule

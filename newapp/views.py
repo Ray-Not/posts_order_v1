@@ -1,13 +1,15 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, UpdateView
-from django.contrib.auth.decorators import login_required
+
 from .forms import PostForm
-from .models import Author, Post
-from django.contrib.auth.models import Group
+from .models import Author, Category, Post, PostCategory
+from allauth.account.views import EmailView
 
 
 def home_view(request):
@@ -81,6 +83,14 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         author = Author.objects.get_or_create(author=self.request.user)[0]
         form.instance.author = author
+
+        post = form.save(commit=False)
+        post.save()
+
+        categories = form.cleaned_data['categories']
+        for category in categories:
+            PostCategory.objects.create(post=post, category=category)
+
         return super().form_valid(form)
 
 
@@ -120,3 +130,28 @@ def become_author(request):
     Author.objects.get_or_create(author=request.user, rating_author=0)
     request.user.groups.add(authors_group)
     return redirect('/accounts/')
+
+
+@login_required
+def subscribe_to_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.user in category.subscribers.all():
+        category.subscribers.remove(request.user)
+    else:
+        category.subscribers.add(request.user)
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+class CustomEmailView(EmailView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user_subscriptions = Category.objects.filter(
+            subscribers=self.request.user
+        )
+
+        context['user_subscriptions'] = user_subscriptions
+
+        return context
