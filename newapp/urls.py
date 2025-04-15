@@ -1,9 +1,9 @@
 # from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from .views import (PostCreateView, PostDeleteView, PostUpdateView,
-                    become_author, home_view, news_detail, news_list,
-                    news_search, subscribe_to_category, CustomEmailView)
+from .views import (CustomEmailView, PostCreateView, PostDeleteView,
+                    PostUpdateView, become_author, check_log, home_view,
+                    news_detail, news_list, news_search, subscribe_to_category)
 
 namespace = 'newapp'
 
@@ -26,5 +26,6 @@ urlpatterns = [
         'subscribe/<int:category_id>/',
         subscribe_to_category,
         name='subscribe_to_category'
-    )
+    ),
+    path('log/<str:type>/', check_log)
 ]

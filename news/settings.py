@@ -10,9 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import sys
 from pathlib import Path
-from .beat import CELERY_BEAT_SCHEDULE
+
 from decouple import config
+
+from .beat import CELERY_BEAT_SCHEDULE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-xqgc2deg@9-)h@u=gp_+bqo%v^7e+z7_*cbpkz1$sxenua)r#p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -145,6 +148,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
@@ -152,6 +156,11 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Admins
+
+ADMINS = [('Site Admin', EMAIL_HOST_USER)]
+SERVER_EMAIL = EMAIL_HOST_USER
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -185,3 +194,147 @@ CELERY_TASK_SERIALIZER = config('CELERY_TASK_SERIALIZER', default='json')
 CELERY_TIMEZONE = config('CELERY_TIMEZONE', default='UTC')
 
 CELERY_BEAT_SCHEDULE = CELERY_BEAT_SCHEDULE
+
+# Logger
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+
+    'formatters': {
+        'file_base': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'console_base': {
+            'format': '[{asctime}] {levelname}: {message}',
+            'style': '{',
+        },
+        'console_warning': {
+            'format': '[{asctime}] {levelname}: {message} \
+                \nПуть: {pathname}',
+            'style': '{',
+        },
+        'error': {
+            'format': '[{asctime}] {levelname}: {message} \
+                \nПуть: {pathname}, Строка: {lineno} {exc_info}\n',
+            'style': '{',
+        },
+        'mail': {
+            'format': '[{asctime}] {levelname}: {message} \
+                \nПуть: {pathname}, Строка: {lineno}\n',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'console_base',
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'console_warning',
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'error',
+        },
+        'general_file': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'file_base',
+        },
+        'errors_file': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'error',
+        },
+        'security_file': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'file_base',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'mail',
+            'include_html': False,
+        },
+    },
+
+    'loggers': {
+        'django': {
+            'handlers': [
+                'console',
+                'console_warning',
+                'console_error',
+                'general_file',
+            ],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': [
+                'security_file',
+            ],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': [
+                'errors_file',
+                'mail_admins',
+            ],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': [
+                'errors_file',
+                'mail_admins',
+            ],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.templates': {
+            'handlers': [
+                'errors_file',
+            ],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db_backends': {
+            'handlers': [
+                'errors_file',
+            ],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    }
+}

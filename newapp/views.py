@@ -1,15 +1,18 @@
+import logging
+
+from allauth.account.views import EmailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, UpdateView
 
 from .forms import PostForm
 from .models import Author, Category, Post, PostCategory
-from allauth.account.views import EmailView
 
 
 def home_view(request):
@@ -155,3 +158,43 @@ class CustomEmailView(EmailView):
         context['user_subscriptions'] = user_subscriptions
 
         return context
+
+
+def check_log(request, type):
+    logger = logging.getLogger('django')
+    security_logger = logging.getLogger('django.security')
+    request_logger = logging.getLogger('django.request')
+
+    log_methods = {
+        'debug': lambda: logger.debug("Это DEBUG сообщение"),
+        'info': lambda: logger.info("Это INFO сообщение"),
+        'warning': lambda: logger.warning("Это WARNING сообщение"),
+        'error': lambda: log_error(),
+        'critical': lambda: log_critical(),
+        'security': lambda: security_logger.critical("Подозрительный IP!"),
+        'mail': lambda: mail(),
+    }
+
+    def log_error():
+        try:
+            1 / 0
+        except Exception:
+            logger.error("Это ERROR сообщение", exc_info=True)
+
+    def log_critical():
+        try:
+            raise RuntimeError("Критическая ошибка")
+        except Exception:
+            logger.critical("Это CRITICAL сообщение", exc_info=True)
+
+    def mail():
+        request_logger.error('Проверка ошибки на почту', exc_info=True)
+        raise Http404('NF')
+
+    log_action = log_methods.get(type.lower())
+    if log_action:
+        log_action()
+    else:
+        logger.info("Неизвестный тип лога")
+
+    return HttpResponse(f"Log type '{type}' checked.")
